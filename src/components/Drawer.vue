@@ -1,7 +1,14 @@
 <script setup>
 import DrawerCartList from "./DrawerCartList.vue";
-import { inject } from "vue";
+import { inject, computed, onMounted } from "vue";
 
+const props = defineProps({
+    totalPrice: Number,
+    isOrderCreated: Boolean,
+})
+
+const orderButtonDisabled = computed(() => props.isOrderCreated ? true : props.totalPrice ? false : true)
+const emit = defineEmits(['createOrder']);
 const { closeDrawer } = inject('cart')
 </script>
 
@@ -23,14 +30,14 @@ const { closeDrawer } = inject('cart')
             <div class="flex gap-2">
                 <span>Итого:</span>
                 <div class="flex-1 border-b border-dashed"></div>
-                <b>12999 руб.</b>
+                <b>{{ totalPrice }} руб.</b>
             </div>
             <div class="flex gap-2">
                 <span>Налог 5%:</span>
                 <div class="flex-1 border-b border-dashed"></div>
-                <b>900 руб.</b>
+                <b>{{ (totalPrice * 0.05).toFixed(0) }} руб.</b>
             </div>
-            <button disabled="false"
+            <button :disabled="orderButtonDisabled" @click='emit("createOrder")'
                 class="bg-lime-500 w-full rounded-xl py-3 text-white hover:bg-lime-600 transition active:bg-lime-700 disabled:bg-slate-300 cursor-pointer mt-2">
                 Оформить заказ
             </button>

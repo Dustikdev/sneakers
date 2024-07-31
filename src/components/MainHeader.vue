@@ -17,11 +17,11 @@ const emit = defineEmits(['openDrawer'])
       </div>
     </div>
     <ul class="flex items-center text-gray-500 gap-4">
-      <li class="flex gap-3 items-center hover:text-black cursor-pointer">
+      <li @click="$emit('openDrawer')" class="flex gap-3 items-center hover:text-black cursor-pointer">
         <img src="/cart.svg" alt="cart">
         <b>{{ totalPrice }} руб.</b>
       </li>
-      <li @click="$emit('openDrawer')" class="flex gap-3 items-center hover:text-black cursor-pointer">
+      <li class="flex gap-3 items-center hover:text-black cursor-pointer">
         <img src="/heart.svg" alt="cart">
         <span>Закладки</span>
       </li>

@@ -2,20 +2,19 @@
 import MainHeader from "./components/MainHeader.vue";
 import CardList from "./components/CardList.vue";
 import Drawer from "./components/Drawer.vue";
-import { onMounted, ref, watch, reactive, provide } from "vue";
+import { onMounted, ref, watch, reactive, provide, computed } from "vue";
 import axios from "axios";
 
 const items = ref([]);
 const drawerItems = ref([]);
-const totalPrice = ref(0);
-
+const totalPrice = computed(() => drawerItems.value.reduce((acc, item) => acc + item.price, 0));
+const isOrderCreated = ref(false);
 const drawerOpen = ref(false);
 
 const filters = reactive({
   sortBy: '',
   searchBy: '',
 })
-
 const onChangeSelect = (event) => {
   filters.sortBy = event.target.value;
 }
@@ -43,13 +42,11 @@ const onClickAddPlus = (item) => {
 
 const addToCart = (item) => {
   drawerItems.value.push(item)
-  totalPrice.value += item.price
   item.isAdded = true
 }
 
 const deleteFromCart = (item) => {
   drawerItems.value.splice(drawerItems.value.indexOf(item), 1)
-  totalPrice.value -= item.price
   item.isAdded = false
 }
 
@@ -116,8 +113,22 @@ const addToFavorite = async (item) => {
   } catch (error) {
     console.log(error)
   }
-
   // console.log(item);
+}
+const createOrder = async () => {
+  try {
+    isOrderCreated.value = true
+    const { data } = await axios.post('https://4d196ee24aeee904.mokky.dev/orders', {
+      items: drawerItems.value,
+      totalPrice: totalPrice.value
+    })
+    drawerItems.value = [];
+    return data;
+  } catch (error) {
+    console.error('There was a problem with the fetch operation:', error);
+  } finally {
+    isOrderCreated.value = false
+  }
 }
 
 onMounted(async () => {
@@ -135,7 +146,7 @@ provide('cart', { closeDrawer, drawerItems, deleteFromCart, addToCart })
 </script>
 
 <template>
-  <Drawer v-if="drawerOpen" />
+  <Drawer v-if="drawerOpen" :total-price="totalPrice" @create-order="createOrder" :is-order-created="isOrderCreated" />
   <div class="w-4/5 mx-auto bg-white rounded-xl shadow-xl mt-10">
     <MainHeader @open-drawer="openDrawer" :total-price="totalPrice" />
     <div class="p-10">
