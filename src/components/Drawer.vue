@@ -1,6 +1,7 @@
 <script setup>
 import DrawerCartList from "./DrawerCartList.vue";
-import { inject, computed, onMounted } from "vue";
+import InfoBlock from "./InfoBlock.vue";
+import { inject, computed } from "vue";
 
 const props = defineProps({
     totalPrice: Number,
@@ -26,7 +27,9 @@ const { closeDrawer } = inject('cart')
             <h2 class="text-2xl font-bold">Корзина</h2>
         </div>
         <DrawerCartList />
-        <div class="flex flex-col flex-1 justify-end gap-4 mb-4">
+        <InfoBlock v-if="!totalPrice" title="Корзина пустая"
+            description="Добавьте хотя бы одну пару кроссовок, чтобы сделать заказ" imageUrl="package-icon.png" />
+        <div v-else class="flex flex-col flex-1 justify-end gap-4 mb-4">
             <div class="flex gap-2">
                 <span>Итого:</span>
                 <div class="flex-1 border-b border-dashed"></div>

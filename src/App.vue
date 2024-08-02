@@ -37,16 +37,20 @@ const onClickAddPlus = (item) => {
   } else {
     deleteFromCart(item)
   }
-  // console.log(drawerItems.value);
+  // console.log(drawerItems.value)
 }
 
 const addToCart = (item) => {
+  // console.log(`item in addtocart: ${JSON.stringify(item)}`);
   drawerItems.value.push(item)
   item.isAdded = true
 }
 
 const deleteFromCart = (item) => {
-  drawerItems.value.splice(drawerItems.value.indexOf(item), 1)
+  // console.log(`its drawer: ${JSON.stringify(drawerItems.value)}`);
+  // console.log(`its item: ${JSON.stringify(item)}`);
+  // console.log(drawerItems.value.findIndex(obj => obj.id === item.id))
+  drawerItems.value.splice(drawerItems.value.findIndex(obj => obj.id === item.id), 1)
   item.isAdded = false
 }
 
@@ -104,7 +108,7 @@ const addToFavorite = async (item) => {
       item.isFavorite = true
       const { data } = await axios.post('https://4d196ee24aeee904.mokky.dev/favorites', obj);
       item.favoriteId = data.id
-      console.log(data)
+      // console.log(data)
     } else {
       item.isFavorite = false
       await axios.delete(`https://4d196ee24aeee904.mokky.dev/favorites/${item.favoriteId}`);
@@ -132,14 +136,34 @@ const createOrder = async () => {
 }
 
 onMounted(async () => {
+  const localItems = localStorage.getItem('drawerItems')
+  drawerItems.value = localItems ? JSON.parse(localItems) : []
   await fetchItems();
   await fetchFavorites();
+  // console.log(drawerItems.value)
+  items.value = items.value.map((item) => ({
+    ...item,
+    isAdded: drawerItems.value.some((drawerItem) => drawerItem.id === item.id)
+  }))
+  // console.log(items.value)
+  console.log(drawerItems.value)
 });
 
 watch(filters, async () => {
   await fetchItems();
   await fetchFavorites();
 });
+
+watch(drawerItems, () => {
+  items.value = items.value.map((item) => ({
+    ...item,
+    isAdded: false
+  }))
+})
+
+watch(drawerItems, () => {
+  localStorage.setItem('drawerItems', JSON.stringify(drawerItems.value))
+}, { deep: true })
 
 provide('cart', { closeDrawer, drawerItems, deleteFromCart, addToCart })
 
